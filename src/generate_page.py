@@ -11,7 +11,7 @@ def extract_title(markdown):
         raise Exception("string does not start with one '# '")
 
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, basepath="/"):
     print(f" * {from_path} {template_path} -> {dest_path}")
     with open(from_path, "r") as f:
         markdown_content = f.read()
@@ -25,6 +25,8 @@ def generate_page(from_path, template_path, dest_path):
     title = extract_title(markdown_content)
     template = template.replace("{{ Title }}", title)
     template = template.replace("{{ Content }}", html)
+    template = template.replace('href="/', f'href="{basepath}')
+    template = template.replace('src="/', f'src="{basepath}')
 
     dest_dir_path = os.path.dirname(dest_path)
     if dest_dir_path != "":
@@ -33,13 +35,13 @@ def generate_page(from_path, template_path, dest_path):
     to_file.write(template)
 
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, basepath="/"):
     for item in os.listdir(dir_path_content):
         source_path = os.path.join(dir_path_content, item)
         dest_path = os.path.join(dest_dir_path, item)
         print(source_path, dest_path)
 
         if os.path.isfile(source_path) and source_path.endswith(".md"):
-            generate_page(source_path, template_path, dest_path.replace(".md", ".html"))
+            generate_page(source_path, template_path, dest_path.replace(".md", ".html"), basepath)
         else:
-            generate_pages_recursive(source_path, template_path, dest_path)
+            generate_pages_recursive(source_path, template_path, dest_path, basepath)
